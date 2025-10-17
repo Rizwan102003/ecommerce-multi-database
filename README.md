@@ -1,58 +1,64 @@
-# Cloud Run Hello World with Cloud Code
+# Polyglot Ecommerce Application
 
-"Hello World" is a [Cloud Run](https://cloud.google.com/run/docs) application that renders a simple webpage.
+## Run the Application Yourself
 
-For details on how to use this sample as a template in Cloud Code, read the documentation for Cloud Code for [VS Code](https://cloud.google.com/code/docs/vscode/quickstart-cloud-run?utm_source=ext&utm_medium=partner&utm_campaign=CDR_kri_gcp_cloudcodereadmes_012521&utm_content=-) or [IntelliJ](https://cloud.google.com/code/docs/intellij/quickstart-cloud-run?utm_source=ext&utm_medium=partner&utm_campaign=CDR_kri_gcp_cloudcodereadmes_012521&utm_content=-).
+To test this multi-modal application, you need to clone the repository and set up your environment variables to connect to the databases you provisioned in Steps 2, 3, and 5.
 
-### Table of Contents
-* [Getting Started with VS Code](#getting-started-with-vs-code)
-* [Getting Started with IntelliJ](#getting-started-with-intellij)
-* [Sign up for User Research](#sign-up-for-user-research)
+1. Go to you Cloud Shell Terminal, clone the repo and navigate into the project folder:
+git clone https://github.com/AbiramiSukumaran/ecommerce-multi-database.git
 
----
-## Getting Started with VS Code
+cd ecommerce-multi-database
 
-### Run the app locally with the Cloud Run Emulator
-1. In the Cloud Code status bar, click on the active project name and select 'Run on Cloud Run Emulator'.  
-![image](./img/status-bar.png)
+2. Install dependencies
 
-2. Use the Cloud Run Emulator dialog to specify your [builder option](https://cloud.google.com/code/docs/vscode/deploying-a-cloud-run-app#deploying_a_cloud_run_service). Cloud Code supports Docker, Jib, and Buildpacks. See the skaffold documentation on [builders](https://skaffold.dev/docs/builders/) for more information about build artifact types.  
-![image](./img/build-config.png)
+pip install -r requirements.txt
 
-3. Click ‘Run’. Cloud Code begins building your image.
+3. Update the .env file you cloned from the repo with your values:
 
-4. View the build progress in the OUTPUT window. Once the build has finished, click on the URL in the OUTPUT window to view your live application.  
-![image](./img/cloud-run-url.png)
+# --- DATABASE SECRETS ---
+# 1. MongoDB Connection String (from MongoDB Atlas)
+MONGODB_CONNECTION_STRING="mongodb+srv://<db_user>:<db_password>@YOUR_CLUSTER.mongodb.net"
 
-5. To stop the application, click the stop icon on the Debug Toolbar.
+# 2. Google Cloud Storage Bucket Name (from Step 5)
+GCS_PRODUCT_BUCKET="your-ecommerce-product-media-bucket"
 
----
-## Getting Started with IntelliJ
+# 3. MCP Toolbox Server Location
+# Must match the address where you run the toolbox server (usually localhost:5000)
+MCP_TOOLBOX_SERVER_URL="http://localhost:5000"
+4. Update the data layer
 
-### Run the app locally with the Cloud Run Emulator
+Update tools.yaml for placeholder with your values.
 
-#### Define run configuration
+Test your tools.yaml tools locally:
 
-1. Click the Run/Debug configurations dropdown on the top taskbar and select 'Edit Configurations'.  
-![image](./img/edit-config.png)
+./toolbox --tools-file "tools.yaml"
 
-2. Select 'Cloud Run: Run Locally' and specify your [builder option](https://cloud.google.com/code/docs/intellij/developing-a-cloud-run-app#defining_your_run_configuration). Cloud Code supports Docker, Jib, and Buildpacks. See the skaffold documentation on [builders](https://skaffold.dev/docs/builders/) for more information about build artifact types.  
-![image](./img/local-build-config.png)
+or
 
-#### Run the application
-1. Click the Run/Debug configurations dropdown and select 'Cloud Run: Run Locally'. Click the run icon.  
-![image](./img/config-run-locally.png)
+./TOOLBOX 
+5. Test your app locally
 
-2. View the build process in the output window. Once the build has finished, you will receive a notification from the Event Log. Click 'View' to access the local URLs for your deployed services.  
-![image](./img/local-success.png)
+(Assuming you have completed all the prior sections and configurations in the blog):
 
----
-## Sign up for User Research
+python app.py
+6. Check your Docker file and app.py starting point
 
-We want to hear your feedback!
+Make sure your Docker file is updated as required based on the original that you cloned from the repo.
 
-The Cloud Code team is inviting our user community to sign-up to participate in Google User Experience Research. 
+7. Check if the app.py is updated
 
-If you’re invited to join a study, you may try out a new product or tell us what you think about the products you use every day. At this time, Google is only sending invitations for upcoming remote studies. Once a study is complete, you’ll receive a token of thanks for your participation such as a gift card or some Google swag. 
+It should have the following snippet in case you had it changed for our local tests. (The file from the repo should already have this):
 
-[Sign up using this link](https://google.qualtrics.com/jfe/form/SV_4Me7SiMewdvVYhL?reserved=1&utm_source=In-product&Q_Language=en&utm_medium=own_prd&utm_campaign=Q1&productTag=clou&campaignDate=January2021&referral_code=UXbT481079) and answer a few questions about yourself, as this will help our research team match you to studies that are a great fit.
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port, debug=False) 
+    # NOTE: debug=False is crucial for production environments like Cloud Run
+8. Deploy your app to Cloud Run
+
+gcloud run deploy multi-db-app --source .
+
+Select the region number (say 34 for us-central1) and allow unauthenticated option (“y”), when prompted.
+
+Check out the blog for initial configurations:
+
+https://medium.com/@abidsukumaran/architecting-for-data-diversity-the-intelligent-e-commerce-catalog-4ceadf4bf104
